@@ -1,0 +1,6 @@
+DATA n=1 s1=0.00 s2=2.50 s3=1
+DATA n=2 s1=35.67 s2=2.50 s3=1
+EVENT n=2 type=THRESHOLD
+DATA n=3 s1=60.27 s2=2.50 s3=1
+DATA n=4 s1=0.00 s2=2.50 s3=1
+EVENT n=4 type=NORMAL

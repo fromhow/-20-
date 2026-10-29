@@ -1,0 +1,9 @@
+missing sensor: PASS
+non-numeric: PASS
+invalid event: PASS
+duplicate DATA: PASS
+empty log: PASS
+event without DATA: PASS
+PIR must be binary: PASS
+pressure out of range: PASS
+BOM / whitespace: PASS

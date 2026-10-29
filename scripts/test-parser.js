@@ -15,5 +15,5 @@ for(const [name,p] of [['PIR must be binary','DATA n=1 s1=10 s2=2 s3=0.5'],['pre
  assert(run(p)[1].payload.includes("'FAULT'"));checks.push(name+': PASS');
 }
 assert(run('\ufeffDATA  n=1  s1=10 s2=2 s3=0\r\n')[1]);checks.push('BOM / whitespace: PASS');
-fs.writeFileSync(R+'/docs/parser_checks.txt',checks.join('\n')+'\n');
+fs.writeFileSync(R+'/docs/tests/parser_checks.txt',checks.join('\n')+'\n');
 console.log(checks.join('\n'));
