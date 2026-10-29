@@ -1,4 +1,4 @@
--- Variant 20. Prepared schema; replace only after reconciling with teacher's schema.
+-- Вариант 20. Схема базы данных SQLite: показания (readings) и события (events).
 PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS readings (
  id INTEGER PRIMARY KEY AUTOINCREMENT,
