@@ -1,0 +1,8 @@
+﻿Name,Designator,Quantity,Manufacturer Part
+White,LED1,1,HL-PT-1608H322W-L(6000K-7000K)
+Potentiometer,PR1,1,Potentiometer WH160-1-104
+120 Ом,R1,1,
+ARDUINO UNO COPY,U1,1,
+KY-019 5V t,U2,1,SRD-05VDC-SL-C
+GAS-SENSOR-MQ2,U3,1,
+PIR Motion Sensor,U4,1,

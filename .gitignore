@@ -1,0 +1,12 @@
+.DS_Store
+.nodered/
+tools/
+node_modules/
+db/variant.db
+db/load.sql
+*.db-journal
+*.db-wal
+*.db-shm
+~$*
+_archive/
+_local/

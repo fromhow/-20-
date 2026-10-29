@@ -1,0 +1,8 @@
+Локальная проверка FAULT через Node-RED на Linux.
+Вход data/log_fault.txt: DATA n=1 s1=101.00 s2=2.50 s3=0
+SELECT n,t_s,type,message FROM events ORDER BY n,id;
+n | t_s | type  | message
+1 | 5   | FAULT | датчик s1 вне диапазона
+Проверка использовала Python SQLite-адаптер команды exec; не Windows sqlite3.exe.
+После проверки основной лог и база восстановлены.
+Машиночитаемое подтверждение: runtime_checks.json.

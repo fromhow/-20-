@@ -1,0 +1,36 @@
+{
+  "source": "user-provided terminal output and screenshots on macOS",
+  "tests": [
+    {
+      "test": "read supplied database and run queries",
+      "result": "confirmed by terminal output"
+    },
+    {
+      "test": "FAULT after Node-RED test button",
+      "result": "confirmed",
+      "event": {
+        "n": 1,
+        "t_s": 5,
+        "type": "FAULT",
+        "message": "датчик s1 вне диапазона"
+      },
+      "evidence": "terminal_fault_mac_original.png"
+    },
+    {
+      "test": "restore original log",
+      "result": "confirmed by user-provided text, not by screenshot",
+      "event": {
+        "n": 1,
+        "t_s": 5,
+        "type": "THRESHOLD",
+        "message": ""
+      }
+    }
+  ],
+  "not_verified": [
+    "NORMAL in Wokwi",
+    "Windows launch",
+    "all EasyEDA electrical nets"
+  ],
+  "user_database_uploaded": false
+}

@@ -1,0 +1,77 @@
+{
+  "environment": "Linux Node-RED; exec uses QA-only Python sqlite3 adapter, not Windows sqlite3.exe",
+  "tests": [
+    {
+      "test": "provided log",
+      "result": "PASS",
+      "readings": 189,
+      "events": [
+        [
+          1,
+          "THRESHOLD",
+          ""
+        ]
+      ]
+    },
+    {
+      "test": "synthetic fault",
+      "result": "PASS",
+      "readings": 3,
+      "events": [
+        [
+          1,
+          "FAULT",
+          "датчик s1 вне диапазона"
+        ]
+      ]
+    },
+    {
+      "test": "synthetic transitions import",
+      "result": "PASS",
+      "readings": 12,
+      "events": [
+        [
+          2,
+          "THRESHOLD",
+          ""
+        ],
+        [
+          4,
+          "NORMAL",
+          ""
+        ]
+      ]
+    },
+    {
+      "test": "repeat import no duplicates",
+      "result": "PASS",
+      "readings": 12,
+      "events": [
+        [
+          2,
+          "THRESHOLD",
+          ""
+        ],
+        [
+          4,
+          "NORMAL",
+          ""
+        ]
+      ]
+    },
+    {
+      "test": "watch log file save",
+      "result": "PASS",
+      "readings": 189,
+      "events": [
+        [
+          1,
+          5,
+          "THRESHOLD",
+          ""
+        ]
+      ]
+    }
+  ],
+  "final_database": "provided log restored"
+}

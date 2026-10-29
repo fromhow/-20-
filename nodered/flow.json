@@ -1,0 +1,293 @@
+[
+  {
+    "id": "v20",
+    "type": "tab",
+    "label": "Variant 20 — Gas boiler",
+    "disabled": false,
+    "info": "T=5s. Each import replaces database contents. Test fixtures are synthetic."
+  },
+  {
+    "id": "watchlog",
+    "type": "watch",
+    "z": "v20",
+    "name": "Изменение log.txt",
+    "x": 160,
+    "y": 100,
+    "wires": [
+      [
+        "filelog"
+      ]
+    ],
+    "files": "data/log.txt",
+    "recursive": false
+  },
+  {
+    "id": "manual",
+    "type": "inject",
+    "z": "v20",
+    "name": "Загрузить реальный лог",
+    "x": 160,
+    "y": 160,
+    "wires": [
+      [
+        "filelog"
+      ]
+    ],
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date"
+  },
+  {
+    "id": "filelog",
+    "type": "file in",
+    "z": "v20",
+    "name": "data/log.txt",
+    "x": 430,
+    "y": 130,
+    "wires": [
+      [
+        "parse"
+      ]
+    ],
+    "filename": "data/log.txt",
+    "filenameType": "str",
+    "format": "utf8",
+    "chunk": false,
+    "sendError": false,
+    "encoding": "utf8",
+    "allProps": false
+  },
+  {
+    "id": "fault",
+    "type": "inject",
+    "z": "v20",
+    "name": "ТЕСТ FAULT (заменит БД)",
+    "x": 170,
+    "y": 240,
+    "wires": [
+      [
+        "filefault"
+      ]
+    ],
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date"
+  },
+  {
+    "id": "filefault",
+    "type": "file in",
+    "z": "v20",
+    "name": "data/log_fault.txt",
+    "x": 430,
+    "y": 240,
+    "wires": [
+      [
+        "parse"
+      ]
+    ],
+    "filename": "data/log_fault.txt",
+    "filenameType": "str",
+    "format": "utf8",
+    "chunk": false,
+    "sendError": false,
+    "encoding": "utf8",
+    "allProps": false
+  },
+  {
+    "id": "test",
+    "type": "inject",
+    "z": "v20",
+    "name": "ТЕСТ переходов (искусственный)",
+    "x": 190,
+    "y": 320,
+    "wires": [
+      [
+        "filetest"
+      ]
+    ],
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date"
+  },
+  {
+    "id": "filetest",
+    "type": "file in",
+    "z": "v20",
+    "name": "data/log_test.txt",
+    "x": 430,
+    "y": 320,
+    "wires": [
+      [
+        "parse"
+      ]
+    ],
+    "filename": "data/log_test.txt",
+    "filenameType": "str",
+    "format": "utf8",
+    "chunk": false,
+    "sendError": false,
+    "encoding": "utf8",
+    "allProps": false
+  },
+  {
+    "id": "parse",
+    "type": "function",
+    "z": "v20",
+    "name": "Проверка → SQL / T=5",
+    "x": 700,
+    "y": 180,
+    "wires": [
+      [
+        "errors"
+      ],
+      [
+        "sqlfile"
+      ]
+    ],
+    "func": "// T must match T_MS/1000 in firmware/sketch.ino.\nconst T = 5;\nconst RANGES = {s1:[0,100],s2:[0,5],s3:[0,1]};\nconst quote = s => \"'\" + String(s).replace(/'/g,\"''\") + \"'\";\nconst text = String(msg.payload).replace(/^\\uFEFF/, '');\nconst sql = [];\nlet rows = 0;\ntry {\n const seen = new Set();\n text.split(/\\r?\\n/).forEach((raw,index) => {\n  const line = raw.trim();\n  if (!line) return;\n  const parts = line.split(/\\s+/);\n  const kind = parts.shift();\n  if (!['DATA','EVENT'].includes(kind)) throw Error(`line ${index+1}: expected DATA or EVENT`);\n  const f = {};\n  parts.forEach(p => {\n   const m = /^([a-z][a-z0-9]*)=(\\S+)$/i.exec(p);\n   if (!m || Object.prototype.hasOwnProperty.call(f,m[1])) throw Error(`line ${index+1}: bad or repeated field`);\n   f[m[1]]=m[2];\n  });\n  if (!/^\\d+$/.test(f.n || '')) throw Error(`line ${index+1}: invalid n`);\n  const n=Number(f.n), t=n*T;\n  if (!Number.isSafeInteger(n) || n<1 || !Number.isSafeInteger(t)) throw Error(`line ${index+1}: n out of bounds`);\n  if (kind==='DATA') {\n   if (seen.has(n)) throw Error(`line ${index+1}: duplicate DATA n=${n}`);\n   seen.add(n);\n   ['s1','s2','s3'].forEach(s => {\n    if (!/^[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)$/.test(f[s] || '')) throw Error(`line ${index+1}: invalid ${s}`);\n    const v=Number(f[s]);\n    if (!Number.isFinite(v)) throw Error(`line ${index+1}: non-finite ${s}`);\n    sql.push(`INSERT INTO readings(n,t_s,sensor,value) VALUES(${n},${t},${quote(s)},${v});`);\n    rows++;\n    const bad=v<RANGES[s][0] || v>RANGES[s][1] || (s==='s3' && ![0,1].includes(v));\n    if (bad) sql.push(`INSERT INTO events(n,t_s,type,message) VALUES(${n},${t},'FAULT',${quote(`датчик ${s} вне диапазона`)});`);\n   });\n  } else {\n   if (!seen.has(n)) throw Error(`line ${index+1}: EVENT must follow its DATA`);\n   if (!['THRESHOLD','NORMAL'].includes(f.type)) throw Error(`line ${index+1}: invalid event type`);\n   sql.push(`INSERT INTO events(n,t_s,type,message) VALUES(${n},${t},${quote(f.type)},'');`);\n  }\n });\n if (!rows) throw Error('no DATA records');\n} catch(e) {\n node.error(e.message,msg);\n return [{payload:'IMPORT REJECTED: '+e.message},null];\n}\nconst head=\"BEGIN;\\nDELETE FROM readings;\\nDELETE FROM events;\\nDELETE FROM sqlite_sequence WHERE name IN ('readings','events');\\n\";\nreturn [null,{payload:head+sql.join('\\n')+'\\nCOMMIT;\\n'}];\n",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": []
+  },
+  {
+    "id": "sqlfile",
+    "type": "file",
+    "z": "v20",
+    "name": "Перезаписать db/load.sql",
+    "x": 980,
+    "y": 180,
+    "wires": [
+      [
+        "sqlite"
+      ]
+    ],
+    "filename": "db/load.sql",
+    "filenameType": "str",
+    "appendNewline": false,
+    "createDir": true,
+    "overwriteFile": "true",
+    "encoding": "utf8"
+  },
+  {
+    "id": "sqlite",
+    "type": "exec",
+    "z": "v20",
+    "name": "SQLite: загрузить",
+    "x": 1240,
+    "y": 180,
+    "wires": [
+      [
+        "stdout"
+      ],
+      [
+        "errors"
+      ],
+      [
+        "exit"
+      ]
+    ],
+    "command": "sqlite3 -bail db/variant.db \".read db/schema.sql\" \".read db/load.sql\"",
+    "addpay": false,
+    "append": "",
+    "useSpawn": "false",
+    "timer": "10",
+    "winHide": true,
+    "oldrc": false
+  },
+  {
+    "id": "stdout",
+    "type": "debug",
+    "z": "v20",
+    "name": "SQLite stdout",
+    "x": 1490,
+    "y": 100,
+    "wires": [],
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto"
+  },
+  {
+    "id": "errors",
+    "type": "debug",
+    "z": "v20",
+    "name": "Ошибки / stderr",
+    "x": 1020,
+    "y": 380,
+    "wires": [],
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto"
+  },
+  {
+    "id": "exit",
+    "type": "debug",
+    "z": "v20",
+    "name": "Код завершения (0 = OK)",
+    "x": 1510,
+    "y": 240,
+    "wires": [],
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto"
+  },
+  {
+    "id": "catch",
+    "type": "catch",
+    "z": "v20",
+    "name": "Ошибки файлов / функции",
+    "x": 720,
+    "y": 460,
+    "wires": [
+      [
+        "errors"
+      ]
+    ],
+    "scope": null,
+    "uncaught": false
+  }
+]

@@ -1,0 +1,37 @@
+Источник: текст команд и вывода, присланный пользователем. Разметка чата снята; содержимое вывода не дополнено.
+
+Last login: Thu Oct 22 12:58:22 on ttys000
+denup@MacBook-Air-denup ~ % sqlite3 -header -column db/variant.db ".read db/queries.sql"
+Error: cannot open "db/queries.sql"
+denup@MacBook-Air-denup ~ % cd /Users/denup/Downloads/variant20
+denup@MacBook-Air-denup variant20 % sqlite3 -header -column db/variant.db ".read db/queries.sql"
+id   n   t_s  sensor  value
+---  --  ---  ------  -----
+189  63  315  s3      0.0
+188  63  315  s2      0.0
+187  63  315  s1      88.66
+186  62  310  s3      0.0
+185  62  310  s2      0.0
+184  62  310  s1      88.66
+183  61  305  s3      0.0
+182  61  305  s2      0.0
+181  61  305  s1      88.66
+180  60  300  s3      0.0
+sensor  minimum  average  maximum
+------  -------  -------  -------
+s1      88.66    88.66    88.66
+s2      0.0      0.0      0.0
+s3      0.0      0.0      0.0
+id  n  t_s  type       message
+--  -  ---  ---------  -------
+1   1  5    THRESHOLD
+
+denup@MacBook-Air-denup variant20 % sqlite3 -header -column db/variant.db "SELECT n,t_s,type,message FROM events ORDER BY n,id;"
+n  t_s  type   message
+-  ---  -----  -----------------------
+1  5    FAULT  датчик s1 вне диапазона
+
+denup@MacBook-Air-denup variant20 % sqlite3 -header -column db/variant.db "SELECT n,t_s,type,message FROM events ORDER BY n,id;"
+n  t_s  type       message
+-  ---  ---------  -------
+1  5    THRESHOLD
