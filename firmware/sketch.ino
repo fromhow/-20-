@@ -8,6 +8,9 @@ const int PIN_LED = 3;
 
 const float THRESHOLD = 20.0;
 
+// Калибровка MQ2: в Wokwi в "чистом воздухе" (0.1 ppm) код АЦП = 210
+const int S1_CLEAN = 210;
+
 
 const int RELAY_ON = LOW;
 const int RELAY_OFF = HIGH;
@@ -34,7 +37,7 @@ void loop() {
   n++;
 
 
-  float s1 = 100.0 * analogRead(PIN_S1) / 1023.0;
+  float s1 = constrain(100.0 * (analogRead(PIN_S1) - S1_CLEAN) / (1023.0 - S1_CLEAN), 0.0, 100.0);
 
 
   float s2 = 5.0 * analogRead(PIN_S2) / 1023.0;
